@@ -284,6 +284,167 @@ If you find that Apache has crashed, you can attempt a manual recovery using the
 - Basic troubleshooting and log analysis
 
 ---
+# 🚀 Automated EC2 Static Website Deployment
+
+> A seamless, zero-touch solution to provision and launch a production-ready static website on Amazon Web Services (AWS) using **EC2 User Data** automation.
+
+---
+
+### 🎨 Key Architectural Features
+
+* ⚡ **Zero-Touch Execution:** Automatically runs on the very first boot cycle of your EC2 instance.
+* 🐧 **Multi-OS Smart Engine:** Intelligently detects and adapts to Ubuntu/Debian (`apt`) or RHEL/CentOS/Rocky Linux (`dnf`/`yum`).
+* 🔒 **Permission-Safe Blueprint:** Dynamically secures directories by applying non-root ownership (`www-data` or `nginx`).
+* 🛡️ **Firewall Self-Healing:** Autodetects, sets up, and updates system firewalls (`UFW` or `Firewalld`) automatically.
+
+---
+
+## 💻 The Automation Script
+
+Paste this complete code block directly into your AWS EC2 instance configuration panel under **Advanced Details** ➡️ **User Data**.
+
+```bash
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Define variables
+DOMAIN="localhost"
+WEB_ROOT="/var/www/html"
+NGINX_CONF_DIR="/etc/nginx/conf.d"
+
+echo "=== Starting Static Website Deployment ==="
+
+# 1. Install Nginx based on package manager
+if [ -x "\$(command -v apt-get)" ]; then
+    echo "Detected Debian/Ubuntu system. Installing Nginx..."
+    sudo apt-get update
+    sudo apt-get install -y nginx
+elif [ -x "\$(command -v dnf)" ]; then
+    echo "Detected RHEL/CentOS/Fedora system. Installing Nginx..."
+    sudo dnf install -y nginx
+elif [ -x "\$(command -v yum)" ]; then
+    echo "Detected older RHEL/CentOS system. Installing Nginx..."
+    sudo yum install -y nginx
+else
+    echo "Error: Unsupported package manager. Please install Nginx manually."
+    exit 1
+fi
+
+# 2. Create the web root directory and a sample file
+echo "Creating web directory at \$WEB_ROOT..."
+sudo mkdir -p "\$WEB_ROOT"
+
+echo "Creating a sample index.html..."
+sudo tee "\$WEB_ROOT/index.html" > /dev/null <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to My Static Site</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; background: #f4f4f9; }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>Success! Your static website is live.</h1>
+    <p>Deployed automatically via Bash script.</p>
+</body>
+</html>
+EOF
+
+# Set appropriate permissions
+echo "Setting permissions..."
+if id "nginx" &>/dev/null; then
+    sudo chown -R nginx:nginx "\$WEB_ROOT"
+elif id "www-data" &>/dev/null; then
+    sudo chown -R www-data:www-data "\$WEB_ROOT"
+fi
+sudo chmod -R 755 "\$WEB_ROOT"
+
+# 3. Configure Nginx Server Block
+echo "Configuring Nginx server block..."
+sudo mkdir -p "\$NGINX_CONF_DIR"
+
+sudo tee "\$NGINX_CONF_DIR/static_site.conf" > /dev/null <<EOF
+server {
+    listen 80;
+    server_name \$DOMAIN;
+
+    root \$WEB_ROOT;
+    index index.html;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+}
+EOF
+
+# 4. Automatically configure the firewall
+echo "Checking firewall configuration..."
+if [ -x "\$(command -v ufw)" ] && sudo ufw status | grep -q "Status: active"; then
+    echo "UFW detected and active. Opening HTTP port..."
+    sudo ufw allow 'Nginx HTTP'
+elif [ -x "\$(command -v firewall-cmd)" ] && sudo systemctl is-active --quiet firewalld; then
+    echo "Firewalld detected and active. Opening HTTP port..."
+    sudo firewall-cmd --permanent --add-service=http
+    sudo firewall-cmd --reload
+else
+    echo "No active UFW or Firewalld detected. Skipping firewall rules."
+fi
+
+# 5. Start and Enable Nginx
+echo "Starting and enabling Nginx service..."
+sudo systemctl daemon-reload
+sudo systemctl enable nginx
+sudo systemctl restart nginx
+
+echo "=== Deployment Complete! ==="
+echo "Visit http://\$DOMAIN or your server's IP address to view your site."
+```
+
+---
+
+## 🛠️ Step-by-Step AWS Setup Walkthrough
+
+### ⚙️ Step 1: Secure & Configure Network Inbound Traffic
+Before launching the server, establish the necessary network inbound rules inside your AWS **Security Group**:
+
+| Rule Type | Port Range | Source Target | Purpose |
+| :--- | :--- | :--- | :--- |
+| **HTTP** | `80` | `0.0.0.0/0` (Anywhere) | Serves web traffic to the world |
+| **SSH** | `22` | `My IP` (Restricted) | Secure CLI system maintenance |
+
+---
+
+### 🖥️ Step 2: Initialize Your Virtual Infrastructure
+1. Open the **AWS EC2 Management Console** and click the **Launch Instance** action button.
+2. Select your base OS image *(Recommended: **Ubuntu Server** or **Amazon Linux 2023**)*.
+3. Choose your instance sizing hardware framework *(e.g., `t2.micro` or `t3.micro` for Free-Tier)*.
+4. Attach your preconfigured network **Security Group** crafted in Step 1.
+
+---
+
+### 🪟 Step 3: Inject the Automation Blueprint
+1. Head to the bottom block and expand the **Advanced Details** layout configuration.
+2. Scroll to the absolute bottom field labeled **User data**.
+3. Copy the raw Bash automation code listed above and paste it directly into the open script context text area box.
+4. Finalize configurations and hit the **Launch Instance** success trigger.
+
+---
+
+### 🎉 Step 4: Verify Live Status
+1. Allow roughly **1 to 2 minutes** for execution pipelines to cleanly finish their boot commands.
+2. Extract the public instance address string tracking indicator labeled **Public IPv4 address** inside your active AWS instance window overview panel.
+3. Open a clean browser window view and type your server's destination address:
+   ```markdown
+   http://<YOUR_EC2_PUBLIC_IP_ADDRESS>
+   ```
+
+---
 
 
 
