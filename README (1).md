@@ -55,31 +55,37 @@ Static Website Files
 
 ### EC2 Instance Running
 
-![EC2 Instance](screenshots/ec2-instance.png)
+
+<img width="1897" height="841" alt="image" src="https://github.com/user-attachments/assets/bbef71ac-92e3-4f61-b4e7-76f56d81f86e" />
+
 
 ---
 
 ### SSH Connection Established
 
-![SSH Login](screenshots/ssh-login.png)
+<img width="1528" height="842" alt="image" src="https://github.com/user-attachments/assets/32f44063-ca1f-4c53-84ee-646c3ce56d26" />
+
 
 ---
 
 ### Nginx Installation
 
-![Nginx Installation](screenshots/nginx-installation.png)
+<img width="1883" height="977" alt="image" src="https://github.com/user-attachments/assets/4d1644e9-a170-4eac-9d24-3ef19e656c78" />
+
 
 ---
 
 ### Nginx Service Running
 
-![Nginx Status](screenshots/nginx-status.png)
+<img width="1698" height="802" alt="image" src="https://github.com/user-attachments/assets/f2fc3e6f-07df-4628-a1af-27853b7d90e1" />
+
 
 ---
 
 ### Website Successfully Hosted
 
-![Website](screenshots/website-hosted.png)
+<img width="1905" height="987" alt="image" src="https://github.com/user-attachments/assets/42793293-2a03-40b7-a35c-0da07038b5c1" />
+
 
 ---
 
