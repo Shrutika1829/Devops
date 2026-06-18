@@ -211,27 +211,67 @@ aws-ec2-nginx-static-website
 
 ---
 
-## 🔍 Verification Commands
+# Troubleshooting Apache Crashes
 
-### Check Nginx Status
-
-```bash
-sudo systemctl status nginx
-```
-
-### Verify Port 80
-
-```bash
-sudo ss -tulnp | grep nginx
-```
-
-### Check Nginx Logs
-
-```bash
-sudo tail -f /var/log/nginx/error.log
-```
+This guide outlines how to determine if your Apache web server (`httpd`) has crashed by checking key technical indicators on your server.
 
 ---
+
+## Technical Indicators of an Apache Crash
+
+### 1. Active Status Shows "failed" or "inactive"
+Run the standard system control status command to check the current state of the service:
+
+```bash
+sudo systemctl status httpd
+```
+
+* **Signs of a crash:** Instead of `Active: active (running)`, the output will display `Active: failed` or `Active: inactive (dead)` (often highlighted in red text).
+
+---
+
+### 2. Network Ports are Completely Empty
+When Apache crashes, it releases its hold on the network ports (typically port 80 and 443). Check if the process is actively listening for incoming traffic:
+
+```bash
+sudo ss -tulpn | grep httpd
+```
+
+* **Signs of a crash:** The command will return absolutely no output, meaning the web server process is no longer running to accept network connections.
+
+---
+
+### 3. "Exit-code" or "Core Dump" in System Logs
+Check the system daemon logs to review recent critical process events:
+
+```bash
+sudo journalctl -u httpd --no-pager -n 20
+```
+
+* **Signs of a crash:** Look for log lines stating:
+  * `Scheduled restart job, restart counter is at X`
+  * `Main process exited, code=exited, status=1/FAILURE`
+  * `Segmentation fault (core dumped)`
+
+---
+
+### 4. Critical Errors in the Apache Error Log
+Open and review the tail end of the primary Apache error log file to find the root cause of the shutdown:
+
+```bash
+sudo tail -n 20 /var/log/httpd/error_log
+```
+
+* **Signs of a crash:** Look for lines containing high-severity log levels such as `[emerg]` (Emergency), `[crit]` (Critical), or explicit crash signals like `caught SIGSEGV, shutting down`.
+
+---
+
+## 🛠 Next Steps
+If you find that Apache has crashed, you can attempt a manual recovery using the following commands:
+
+* **To restart the service:** `sudo systemctl restart httpd`
+* **To check configuration syntax errors before starting:** `sudo apachectl configtest`
+
 
 ## 🧠 Key Learnings
 
