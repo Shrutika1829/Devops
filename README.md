@@ -1,5 +1,5 @@
-.
 
+# EC2 Services
 ---
 
 ## 📋 Prerequisites
