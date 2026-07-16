@@ -423,12 +423,12 @@ Both should succeed — proving the private instance can reach the internet via 
 |---------|-----|
 | Cannot SSH to bastion | Check SG allows port 22 from your IP. Verify public IP is assigned to the instance. |
 | Bastion has no internet | Check `public-rt` has `0.0.0.0/0 → IGW` and `public-subnet` is associated. |
-| SSH permission denied (key) | Run `chmod 400 lab-key.pem` — permissions must be restricted to owner only. |
+| SSH permission denied (key) | Run "chmod 400 lab-key.pem" — permissions must be restricted to owner only. |
 | Cannot SSH from bastion to private instance | Ensure `lab-key.pem` is on the bastion. `private-sg` must allow port 22 from `10.0.1.0/24`. |
 | Private instance has no internet | Check `private-rt` has `0.0.0.0/0 → NAT GW`. NAT GW must be in `Available` state. |
 | NAT GW still shows `Pending` | Wait 1–2 more minutes. NAT Gateway provisioning takes time. |
 | EC2 launched in wrong VPC/subnet | Terminate instance, re-launch and explicitly select `myvpc` and the correct subnet. |
-
+| SSH Permission denied : No such file or directory found |  Recreate the key manually-  open "key.pem" with a text editor and copy all the text (including the -----BEGIN RSA PRIVATE KEY----- line and save & exit and change its permission `chmod 400 "lab-key.pem" `|
 ---
 
 ## Cleanup (Avoid Charges)
